@@ -67,8 +67,17 @@ hog(img, orientations=orient,
 
 ```
 
-The figure below shoes 3 random car and non-car images and their HOG features:
+The figure below shoes 3 random car images, and their corresponding HOG features for each channel in the YCrCb color space:
 
+![{cars}](figs/cars.png)
+
+![{cars_hog}](figs/cars_hog.png)
+
+And here are some HOG features for 3 random non-car images
+
+![{noncars}](figs/noncars.png)
+
+![{noncars_hog}](figs/noncars_hog.png)
 
 In addition to HOG we use Spatial features, which is the binned color features.
 
@@ -164,4 +173,24 @@ print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
 t = time.time()
 ```
 
+The model has about 99% accuracy on the validation set.
 
+#### Sliding-Window Search Pipeline
+
+The view field of the car, captured by the installed camera on the front contains a wide area spanning the street, trees on the side and the sky. To decrease the time spent searching for cars, we limit the region of interest to fall in the bottom half of the image.
+
+Also, cars have different sclales. The sliding window method will create a set of windows, with a specific overlap (90% in both dimensions) and size (80x80). Each window gets normalized before HOG features are extracted. Then we standardize these features and feed them to the trained model to make a prediciton. The search function returns a list of bounding boxes for which the model predicted a vehicle.
+
+
+In order to reject false positives, we apply a heat map, which increments pixels that happen to fall within a bounding box of a vehicle (windows where the model predicted a vehicle), and then we apply a threshold there, by assigning zero value to all pixels except the ones that have been classified as part of a vehicle more than x times, where x is a threshold.
+
+
+
+When applied to the set of test images, the following bounding boxes are produced.
+
+![{heat}](figs/heat.png)
+
+
+
+
+#### Discussion
