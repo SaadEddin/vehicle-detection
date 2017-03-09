@@ -242,3 +242,18 @@ On the heat map, which provides a label for each detection: aka each squarely-co
 
 ## Application on Video Stream
 ---
+
+Here is a link to the video output: [video_output](https://www.youtube.com/watch?v=rhRo-Z_B0yI).
+
+The video results from applying the whole pipeline as described above, including using the implemetation to combine the overlapping windows into one box. In addition, a Car object is created, that stores previous predictions and allows for averaging the bounding box in the current frame with the previous predictions.
+
+This helps in stabilizing the predictions from one frame to another, instead of the bounding box moving constantly due to significant difference in location from one frame to another. 
+
+The methods:
+
+```python
+def average_bboxes(image,detected=None)
+def get_hot_windows(image, previous=None, count=0)
+```
+
+And the Vehicle() class implement this logic. 
