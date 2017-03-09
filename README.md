@@ -282,8 +282,8 @@ In the `average_bboxes` method, the logic:
  Checks for previous frame detections for the `Vehicle` object, which is created on the first frame, and averages the heat maps detected in the current frame with the previous ones, producing a more stable detection.
  
  
- ## Discussion
- ---
+## Discussion
+---
  
 The model had many false detections before applying a threshold of 2. I believe this can be partially attributed to using Spatial features, which bins the intensity value. Using this feature can be misleading as intensity values are not very distincive a.k.a there can be a non-car window that have the distribution of intensity values as a car.
 
