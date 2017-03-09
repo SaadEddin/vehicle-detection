@@ -290,4 +290,4 @@ The model had many false detections before applying a threshold of 2. I believe 
 HOG is more distinctive since the gradient will take high values on edges, emphasizing the shape of the car. Using it by itself might produce better results. But a problem that could face HOG is cars in shadow areas, or bright cars in bright areas, since this will make the edges harder to detect and the gradients will take smaller values. This was seen in some images in the training set, like the figure below - a dark car in a dark area, we see that the gradients do not emphasize the shape of a car:
 
 ![{dark_car}](figs/dark_car.png)
-![{hog_dark_car}](figs/dark_car.png)
+![{hog_dark_car}](figs/hog_dark_car.png)
