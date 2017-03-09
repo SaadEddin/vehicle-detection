@@ -243,7 +243,7 @@ On the heat map, which provides a label for each detection: aka each squarely-co
 ## Application on Video Stream
 ---
 
-Here is a link to the video output: [video_output](https://www.youtube.com/watch?v=rhRo-Z_B0yI).
+Here is [a link to the video output](https://www.youtube.com/watch?v=rhRo-Z_B0yI).
 
 The video results from applying the whole pipeline as described above, including using the implemetation to combine the overlapping windows into one box. In addition, a Car object is created, that stores previous predictions and allows for averaging the bounding box in the current frame with the previous predictions.
 
@@ -256,4 +256,38 @@ def average_bboxes(image,detected=None)
 def get_hot_windows(image, previous=None, count=0)
 ```
 
-And the Vehicle() class implement this logic. 
+And the `Vehicle()` class implement this logic.
+
+In the `average_bboxes` method, the logic:
+
+```
+    if detected is None:
+        detected = Vehicle()
+        
+    if len(detected.previousHeat)<detected.averageCount:
+        for i in range(detected.averageCount):
+            detected.previousHeat.append(np.copy(heatmap).astype(np.float))
+        
+    detected.previousHeat[detected.iteration%detected.averageCount] = heatmap
+    total = np.zeros(np.array(detected.previousHeat[0]).shape)
+    
+    for value in detected.previousHeat:
+        total += np.array(value)
+    
+    averageHeatMap = total/detected.averageCount
+    
+    averageHeatMap = apply_threshold(averageHeatMap,2)
+ ```
+ 
+ Checks for previous frame detections for the `Vehicle` object, which is created on the first frame, and averages the heat maps detected in the current frame with the previous ones, producing a more stable detection.
+ 
+ 
+ ## Discussion
+ ---
+ 
+The model had many false detections before applying a threshold of 2. I believe this can be partially attributed to using Spatial features, which bins the intensity value. Using this feature can be misleading as intensity values are not very distincive a.k.a there can be a non-car window that have the distribution of intensity values as a car.
+
+HOG is more distinctive since the gradient will take high values on edges, emphasizing the shape of the car. Using it by itself might produce better results. But a problem that could face HOG is cars in shadow areas, or bright cars in bright areas, since this will make the edges harder to detect and the gradients will take smaller values. This was seen in some images in the training set, like the figure below - a dark car in a dark area, we see that the gradients do not emphasize the shape of a car:
+
+![{dark_car}](figs/dark_car.png)
+![{hog_dark_car}](figs/dark_car.png)
