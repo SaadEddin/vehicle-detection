@@ -179,17 +179,34 @@ The model has about 99% accuracy on the validation set.
 
 The view field of the car, captured by the installed camera on the front contains a wide area spanning the street, trees on the side and the sky. To decrease the time spent searching for cars, we limit the region of interest to fall in the bottom half of the image.
 
-Also, cars have different sclales. The sliding window method will create a set of windows, with a specific overlap (90% in both dimensions) and size (80x80). Each window gets normalized before HOG features are extracted. Then we standardize these features and feed them to the trained model to make a prediciton. The search function returns a list of bounding boxes for which the model predicted a vehicle.
+Also, cars have different sclales. The sliding window method will create a set of windows, with a specific overlap (90% in both dimensions) and size (80x80). Each window gets normalized before HOG features are extracted. Then we standardize these features and feed them to the trained model to make a prediciton. The search function returns a list of bounding boxes for which the model predicted a vehicle. The figure below shows how the slide_window method works to produce a set of boxes, on different scales, to be searched for cars:
 
+![{boxes}](figs/boxes.png)
+
+And here is the corresponsing code:
+
+```python
+img = mpimg.imread("test_images/test1.jpg")
+img_norm = img.astype(np.float32)/255
+windows_80 = helpers.slide_window(img_norm, x_start_stop=[None, None], y_start_stop=[400,600]
+                                          , xy_window=(80, 80), xy_overlap=(0.50, 0.50))
+windows_128 = helpers.slide_window(img_norm, x_start_stop=[None, None], y_start_stop=[500,720], 
+                    xy_window=(128, 128), xy_overlap=(0.50, 0.5))
+windows = windows_80 + windows_128
+```
+
+This workflow results in two main issues:
+
+* False Positives: Windows where the model detected a car while none existed.
+* Combining multiple detections for the same car due to window overlap.
+* Stability of the bounding boxes between consecutive frames.
 
 In order to reject false positives, we apply a heat map, which increments pixels that happen to fall within a bounding box of a vehicle (windows where the model predicted a vehicle), and then we apply a threshold there, by assigning zero value to all pixels except the ones that have been classified as part of a vehicle more than x times, where x is a threshold.
 
 ```python
 def add_heat(heatmap, bbox_list):
-    # Iterate through list of bboxes
     for box in bbox_list:
         heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] += 1
-
     return heatmap
 
 
@@ -198,7 +215,16 @@ def apply_threshold(heatmap, threshold):
     return heatmap
 ```
 
-When applied to the set of test images, the following bounding boxes are produced. The original image with the bounding box is to the left. In the middle, the heat for each pixel is shows, based on the number of positive window each pixel has been part of. To the right, we apply the scipy function
+For the overlapping detections for the same car, such as in the image below, we would like to combine all these detections into one bounding box. This is achived by having the bounding box surround the heat area associated with that car, since all these overlapping windows have the same label. This is implemented in the method
+
+```python
+def get_hot_windows(image, previous=None, count=0)
+```
+
+![{overlap}](figs/overlap.png)
+
+
+When the pipeline applied on the set of test images, the following bounding boxes are produced. The original image with the bounding box - after tackling the issue of overlapping windows - is to the left. In the middle, the heat for each pixel is shown, based on the number of positive window each pixel has been part of. To the right, we apply the scipy function
 
 ```python
 scipy.ndimage.measurements.label(heat)
