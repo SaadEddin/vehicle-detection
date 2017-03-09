@@ -1,4 +1,4 @@
-## Vehicle Detection
+# Vehicle Detection
 
 The objective of this project is to train a classifier to detect cars, and stream-line it to work on a video input. In the next sections of this write-up we cover the code provided in the jupyter notebook, which represents the pipeline for detecting the images.
 
@@ -51,7 +51,8 @@ Finally, we apply the pipeline on a video stream, and go over extension methods 
 
 
 
-#### HOG and Spatial Features
+## HOG and Spatial Features
+---
 
 There are multiple features that can be used, such as SIFT, SURF and HOG features, in addition to color-dependent/intensity-dependent features. Another option is to rely on a deep learning model that automatically comes up with its set of features.
 
@@ -132,7 +133,8 @@ def extract_features(imgs, color_space=color_space, spatial_size=spatial_size,
 
 The extracted features are pickeld in feat.pkl for easier retrieval on next iterations.                             
 
-#### Model Training
+## Model Training
+---
 
 Before training the model, we standardize the features by removing the mean and scaling them to unit variance. For that we use:
 
@@ -238,4 +240,5 @@ On the heat map, which provides a label for each detection: aka each squarely-co
 
 
 
-#### Discussion
+## Application on Video Stream
+---
