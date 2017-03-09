@@ -184,11 +184,30 @@ Also, cars have different sclales. The sliding window method will create a set o
 
 In order to reject false positives, we apply a heat map, which increments pixels that happen to fall within a bounding box of a vehicle (windows where the model predicted a vehicle), and then we apply a threshold there, by assigning zero value to all pixels except the ones that have been classified as part of a vehicle more than x times, where x is a threshold.
 
+```python
+def add_heat(heatmap, bbox_list):
+    # Iterate through list of bboxes
+    for box in bbox_list:
+        heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] += 1
+
+    return heatmap
 
 
-When applied to the set of test images, the following bounding boxes are produced.
+def apply_threshold(heatmap, threshold):
+    heatmap[heatmap <= threshold] = 0
+    return heatmap
+```
+
+When applied to the set of test images, the following bounding boxes are produced. The original image with the bounding box is to the left. In the middle, the heat for each pixel is shows, based on the number of positive window each pixel has been part of. To the right, we apply the scipy function
+
+```python
+scipy.ndimage.measurements.label(heat)
+```
+
+On the heat map, which provides a label for each detection: aka each squarely-connected group of non-zero pixels. Each label is a specific level of gray scale.
 
 ![{heat}](figs/heat.png)
+
 
 
 
